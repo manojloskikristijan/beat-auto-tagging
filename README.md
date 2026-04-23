@@ -6,11 +6,8 @@ A stateless FastAPI microservice that extracts musical features from audio files
 
 ## Features
 
-- **BPM Detection** — Estimates tempo using percussive source separation and beat tracking via librosa.
-- **Musical Key Detection** — Identifies the key (e.g. "A minor", "G major") using chroma analysis with an ensemble of three musicological key profiles:
-  - Krumhansl-Kessler (1990)
-  - Temperley (2007)
-  - Albrecht & Shanahan (2013)
+- **BPM Detection** — Estimates tempo using Essentia's `RhythmExtractor2013` (multifeature method), a MIREX-tuned multi-estimator beat tracker.
+- **Musical Key Detection** — Identifies the key (e.g. "A minor", "G major") using Essentia's `KeyExtractor` with the `bgate` profile (Faraldo 2016) — the production-grade default for modern pop and electronic music.
 - **Confidence Score** — Reports how strongly the detected key stands out from alternatives (0–1).
 - **Streaming Download** — Fetches remote audio via streaming with size limits (20 MB) and content-type validation.
 - **Containerized** — Ships with a production-ready Dockerfile.
@@ -62,8 +59,7 @@ audio_service/
 │   ├── routes/
 │   │   └── analyze.py             # POST /analyze endpoint
 │   ├── services/
-│   │   ├── audio_analysis.py      # Orchestrates BPM + key detection with librosa
-│   │   └── key_detection.py       # Key detection using chroma correlation
+│   │   └── audio_analysis.py      # BPM + key detection via Essentia
 │   └── utils/
 │       └── downloader.py          # Async audio file downloader with validation
 ├── Dockerfile
@@ -78,13 +74,13 @@ audio_service/
 ### Prerequisites
 
 - Python 3.10+
-- FFmpeg and libsndfile (system dependencies for audio processing)
+- FFmpeg (runtime dependency for Essentia's audio loader)
 
 ### Local Setup
 
 ```bash
 # Install system dependencies (macOS)
-brew install ffmpeg libsndfile
+brew install ffmpeg
 
 # Install Python dependencies
 pip install -r requirements.txt
@@ -109,7 +105,7 @@ The service will be available at `http://localhost:8000`.
 
 ## Supported Audio Formats
 
-MP3, WAV, FLAC, and OGG — up to 20 MB per file. Only the first 60 seconds of audio are analyzed to keep response times low.
+MP3, WAV, FLAC, and OGG — up to 20 MB per file. The full track is analyzed.
 
 ---
 
@@ -118,6 +114,6 @@ MP3, WAV, FLAC, and OGG — up to 20 MB per file. Only the first 60 seconds of a
 | Component       | Technology          |
 |-----------------|---------------------|
 | Framework       | FastAPI + Uvicorn   |
-| Audio Analysis  | librosa, NumPy, SciPy |
+| Audio Analysis  | Essentia, NumPy     |
 | HTTP Client     | httpx (async)       |
 | Containerization| Docker (python:3.10-slim) |

@@ -16,7 +16,7 @@ class AnalyzeRequest(BaseModel):
 
 
 class AnalyzeResponse(BaseModel):
-    bpm: float
+    bpm: int
     key: str
     confidence: float
 
