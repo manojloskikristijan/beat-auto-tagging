@@ -15,10 +15,18 @@ class AnalyzeRequest(BaseModel):
     file_url: HttpUrl
 
 
+class TagPrediction(BaseModel):
+    label: str
+    prob: float
+
+
 class AnalyzeResponse(BaseModel):
     bpm: int
     key: str
     confidence: float
+    genres: list[TagPrediction]
+    moods: list[TagPrediction]
+    instruments: list[TagPrediction]
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)

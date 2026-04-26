@@ -1,9 +1,11 @@
-"""High-level audio analysis: BPM + musical key via Essentia."""
+"""High-level audio analysis: BPM + musical key + genre/mood/instrument tags."""
 
 import logging
 from pathlib import Path
 
 import essentia.standard as es
+
+from app.services.classifier import classify
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +17,7 @@ _FLAT_TO_SHARP = {"Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#"}
 
 
 def analyze_audio(file_path: Path) -> dict:
-    """Analyze an audio file and return BPM, key, and key confidence."""
+    """Analyze an audio file: BPM, key + confidence, and genre/mood/instrument tags."""
     logger.info("Loading audio from %s (sr=%d)", file_path, TARGET_SR)
     audio = es.MonoLoader(filename=str(file_path), sampleRate=TARGET_SR)()
 
@@ -29,4 +31,6 @@ def analyze_audio(file_path: Path) -> dict:
     confidence = round(float(strength), 4)
     logger.info("Detected key: %s (confidence=%.4f)", key_string, confidence)
 
-    return {"bpm": bpm, "key": key_string, "confidence": confidence}
+    tags = classify(file_path)
+
+    return {"bpm": bpm, "key": key_string, "confidence": confidence, **tags}
