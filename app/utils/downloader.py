@@ -8,7 +8,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-MAX_FILE_SIZE: int = 20 * 1024 * 1024  # 20 MB
+MAX_FILE_SIZE: int = 200 * 1024 * 1024  # 200 MB
 ALLOWED_CONTENT_TYPES: set[str] = {
     "audio/mpeg",
     "audio/wav",
