@@ -10,7 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# essentia-tensorflow is a ~290 MB wheel; bump pip's timeout/retries so a slow
+# or flaky connection doesn't abort the build mid-download.
+RUN pip install --no-cache-dir --timeout 120 --retries 10 -r requirements.txt
 
 # Pre-trained Discogs-EffNet models (shared embedding + 3 classification heads).
 # Hosted by the MTG (Music Technology Group, UPF Barcelona).
